@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Profil akun pengguna SIM Kesiswaan MAN 2 Seram Bagian Timur",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 64 },
+        "identifierNumber": { "type": "string", "maxLength": 64 },
+        "positionTitle": { "type": "string", "maxLength": 128 },
+        "phoneNumber": { "type": "string", "maxLength": 32 },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email", "displayName", "role", "isActive"]
+    },
+    "SchoolConfig": {
+      "title": "SchoolConfig",
+      "description": "Pengaturan master identitas madrasah, logo, kop surat, pejabat pengesah",
+      "type": "object",
+      "properties": {
+        "madrasahName": { "type": "string", "maxLength": 128 },
+        "npsn": { "type": "string", "maxLength": 32 },
+        "nsm": { "type": "string", "maxLength": 32 },
+        "academicYear": { "type": "string", "maxLength": 32 },
+        "headmasterName": { "type": "string", "maxLength": 128 },
+        "headmasterNip": { "type": "string", "maxLength": 64 },
+        "wakaName": { "type": "string", "maxLength": 128 },
+        "wakaNip": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["madrasahName", "academicYear"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Jejak audit aktivitas penting pengguna untuk transparansi dan akuntabilitas",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 128 },
+        "userRole": { "type": "string", "maxLength": 64 },
+        "action": { "type": "string", "maxLength": 64 },
+        "module": { "type": "string", "maxLength": 64 },
+        "description": { "type": "string", "maxLength": 256 },
+        "ipAddress": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["timestamp", "userId", "action", "module", "description"]
+    },
+    "RolePermission": {
+      "title": "RolePermission",
+      "description": "Konfigurasi matriks hak akses dinamis RBAC",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "maxLength": 64 },
+        "module": { "type": "string", "maxLength": 64 },
+        "view": { "type": "boolean" },
+        "create": { "type": "boolean" },
+        "edit": { "type": "boolean" },
+        "delete": { "type": "boolean" },
+        "approve": { "type": "boolean" },
+        "print": { "type": "boolean" },
+        "export": { "type": "boolean" }
+      },
+      "required": ["role", "module"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Data akun pengguna madrasah dan role"
+    },
+    "/schoolSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/SchoolConfig" },
+      "description": "Master data identitas madrasah"
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Log aktivitas sistem dan keamanan"
+    },
+    "/permissions/{permissionId}": {
+      "schema": { "$ref": "#/entities/RolePermission" },
+      "description": "Konfigurasi izin dinamis per role dan modul"
+    }
+  }
+}

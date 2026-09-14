@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all unmapped paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        getUserData().role == 'SUPER_ADMIN' ||
+        request.auth.token.email == 'puputhuawei24@gmail.com'
+      );
+    }
+
+    function isWakaKesiswaan() {
+      return isSignedIn() && (getUserData().role == 'WAKA_KESISWAAN' || isSuperAdmin());
+    }
+
+    function isGuruBK() {
+      return isSignedIn() && getUserData().role == 'GURU_BK';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isSuperAdmin() || isWakaKesiswaan());
+      allow list: if isSuperAdmin() || isWakaKesiswaan();
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() || (isOwner(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'phoneNumber']));
+      allow delete: if isSuperAdmin();
+    }
+
+    // School Settings collection
+    match /schoolSettings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin() || isWakaKesiswaan();
+    }
+
+    // Permissions configuration
+    match /permissions/{permissionId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    // Audit logs collection (Append-only by authorized users, read-only for Admin & Waka)
+    match /auditLogs/{logId} {
+      allow get, list: if isSuperAdmin() || isWakaKesiswaan();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false; // Immutable audit log
+    }
+
+    // Strict Confidential BK Collection
+    match /counseling_confidential/{recordId} {
+      allow read, write: if isGuruBK() || isWakaKesiswaan();
+    }
+  }
+}

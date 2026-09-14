@@ -1,0 +1,6 @@
+{
+  "name": "SIM Kesiswaan MAN 2 SBT",
+  "description": "Sistem Informasi Manajemen Kesiswaan MAN 2 Seram Bagian Timur - Pengelolaan administrasi kesiswaan, OSIM, ekstrakurikuler, tata tertib & poin, BK, dan kas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
